@@ -229,15 +229,109 @@ class LoadPaintedMask:
             return (mask,)
 
 
+class GIFMaskEditor:
+    """
+    Interactive mask editor for GIF frames.
+    Right-click on the image preview → Open in MaskEditor → Paint → Apply.
+    This integrates with ComfyUI's built-in mask editing.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+            },
+            "optional": {
+                "mask": ("MASK",),
+            }
+        }
+    
+    RETURN_TYPES = ("IMAGE", "MASK")
+    RETURN_NAMES = ("image", "mask")
+    FUNCTION = "edit_mask"
+    CATEGORY = "GifInpaint"
+    
+    def edit_mask(self, image, mask=None):
+        """
+        Returns the image and mask.
+        In ComfyUI UI, right-click on the preview to edit mask.
+        """
+        # Get dimensions
+        height = image.shape[1]
+        width = image.shape[2]
+        
+        # If no mask provided, create blank
+        if mask is None:
+            mask = torch.zeros((height, width), dtype=torch.float32)
+        
+        # Return both image and mask for editing
+        return (image, mask)
+
+
+class ImageToMask:
+    """
+    Create a mask by converting an image to grayscale.
+    Useful for loading mask images through LoadImage node.
+    """
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "channel": (["red", "green", "blue", "alpha", "luminance"],),
+                "invert": (["no", "yes"],),
+            }
+        }
+    
+    RETURN_TYPES = ("MASK",)
+    FUNCTION = "image_to_mask"
+    CATEGORY = "GifInpaint"
+    
+    def image_to_mask(self, image, channel, invert):
+        """Convert image to mask based on selected channel."""
+        
+        # Select channel
+        if channel == "red":
+            mask = image[:, :, :, 0]
+        elif channel == "green":
+            mask = image[:, :, :, 1]
+        elif channel == "blue":
+            mask = image[:, :, :, 2]
+        elif channel == "alpha":
+            if image.shape[3] < 4:
+                # No alpha channel, use luminance
+                mask = 0.299 * image[:, :, :, 0] + 0.587 * image[:, :, :, 1] + 0.114 * image[:, :, :, 2]
+            else:
+                mask = image[:, :, :, 3]
+        else:  # luminance
+            mask = 0.299 * image[:, :, :, 0] + 0.587 * image[:, :, :, 1] + 0.114 * image[:, :, :, 2]
+        
+        # Take first image if batch
+        if len(mask.shape) > 2:
+            mask = mask[0]
+        
+        # Invert if requested
+        if invert == "yes":
+            mask = 1.0 - mask
+        
+        return (mask,)
+
+
 # Node registration
 NODE_CLASS_MAPPINGS = {
     "ManualMaskPainter": ManualMaskPainter,
     "SimpleMaskDrawer": SimpleMaskDrawer,
     "LoadPaintedMask": LoadPaintedMask,
+    "GIFMaskEditor": GIFMaskEditor,
+    "ImageToMask": ImageToMask,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ManualMaskPainter": "Manual Mask Painter",
     "SimpleMaskDrawer": "Simple Mask Drawer",
     "LoadPaintedMask": "Load Painted Mask",
+    "GIFMaskEditor": "GIF Mask Editor",
+    "ImageToMask": "Image to Mask Converter",
 }

@@ -26,13 +26,20 @@ The most requested feature is here: **true manual mask painting**. Instead of re
 - 🎯 **Full precision control** - zoom, layers, soft brushes, selections
 - 🔄 **Apply to all frames** - paint once, masks entire GIF
 
-**Quick Start:**
-1. Extract first frame from your GIF
-2. Paint white over areas to remove (in any image editor)
-3. Save as PNG to `ComfyUI/input/` folder
-4. Use `LoadPaintedMask` node → apply to all frames!
+**OR use ComfyUI's built-in mask editor:**
+- 🖱️ **Right-click on image preview** → Open in MaskEditor
+- 🎨 **Paint directly in ComfyUI** - no external tools needed
+- ⚡ **Instant workflow** - GIFMaskEditor node + interactive painting
 
-See **[MANUAL_MASK_GUIDE.md](MANUAL_MASK_GUIDE.md)** for complete tutorial and workflow.
+**Quick Start (Paint in ComfyUI):**
+1. LoadGIF → GIFFrameSelector (first frame) → **GIFMaskEditor**
+2. Run once → right-click preview → **Open in MaskEditor**
+3. Paint white over areas to remove → Save
+4. Connect mask to BatchMaskGenerator → process!
+
+See **[INTERACTIVE_MASK.md](INTERACTIVE_MASK.md)** for right-click painting guide.  
+See **[MANUAL_MASK_GUIDE.md](MANUAL_MASK_GUIDE.md)** for external painting tutorial.
+
 
 ## 📋 Problem Solved
 
@@ -170,6 +177,39 @@ Load hand-painted masks from external image editors (Photoshop, GIMP, etc.).
 - `MASK`: Loaded and auto-resized mask
 
 **Workflow:** Paint white = remove, black = keep. See `workflows/true_manual_painting.json`
+
+### 🎨 GIF Mask Editor ⭐ NEW - INTERACTIVE!
+Paint masks directly in ComfyUI using the built-in mask editor!
+
+**Inputs:**
+- `image`: Single GIF frame (from GIFFrameSelector)
+- `mask`: Optional existing mask
+
+**Outputs:**
+- `image`: Pass-through image
+- `mask`: Your painted mask
+
+**How to use:**
+1. Connect GIF frame to this node
+2. Run workflow once (generates preview)
+3. **Right-click on preview → "Open in MaskEditor"**
+4. Paint white over areas to remove
+5. Save and run again!
+
+**Workflow:** See `INTERACTIVE_MASK.md` for complete guide
+
+### 🔄 Image to Mask Converter
+Convert any image to a mask (useful with LoadImage node).
+
+**Inputs:**
+- `image`: Any IMAGE input
+- `channel`: Which channel to use (red/green/blue/alpha/luminance)
+- `invert`: Flip mask values
+
+**Outputs:**
+- `MASK`: Converted mask
+
+**Use case:** When using ComfyUI's LoadImage with mask, convert to our format
 
 ### ✏️ Simple Mask Drawer
 Draw masks using coordinate points (for testing).
