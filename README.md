@@ -15,6 +15,25 @@
 👁️ **Live Preview** - See mask overlay before inpainting  
 💾 **Direct Export** - Save as optimized animated GIF  
 
+## 🎨 Manual Mask Painting (NEW!)
+
+**Paint your masks in Photoshop/GIMP, load them in ComfyUI!**
+
+The most requested feature is here: **true manual mask painting**. Instead of relying on automated box/color masks, you can now:
+
+- ✏️ **Paint masks in your favorite image editor** (Photoshop, GIMP, Krita, Paint.NET)
+- 📥 **Load with LoadPaintedMask node** - drag and drop
+- 🎯 **Full precision control** - zoom, layers, soft brushes, selections
+- 🔄 **Apply to all frames** - paint once, masks entire GIF
+
+**Quick Start:**
+1. Extract first frame from your GIF
+2. Paint white over areas to remove (in any image editor)
+3. Save as PNG to `ComfyUI/input/` folder
+4. Use `LoadPaintedMask` node → apply to all frames!
+
+See **[MANUAL_MASK_GUIDE.md](MANUAL_MASK_GUIDE.md)** for complete tutorial and workflow.
+
 ## 📋 Problem Solved
 
 Creators struggle with unwanted elements in GIFs that require tedious manual removal. Existing solutions either:
@@ -134,6 +153,47 @@ Preview frames with mask overlay before inpainting.
 
 ### ℹ️ GIF Info
 Display information about loaded GIF (frames, size, memory).
+
+---
+
+## 🎨 Manual Painting Nodes (NEW!)
+
+### 🖼️ Load Painted Mask ⭐ RECOMMENDED
+Load hand-painted masks from external image editors (Photoshop, GIMP, etc.).
+
+**Inputs:**
+- `reference_image`: Frame for size matching
+- `mask_image_path`: Filename in input folder (e.g., "my_mask.png")
+- `invert_mask`: Swap black/white if needed (yes/no)
+
+**Outputs:**
+- `MASK`: Loaded and auto-resized mask
+
+**Workflow:** Paint white = remove, black = keep. See `workflows/true_manual_painting.json`
+
+### ✏️ Simple Mask Drawer
+Draw masks using coordinate points (for testing).
+
+**Inputs:**
+- `reference_image`: Frame for sizing
+- `brush_strokes`: Coordinates like "100,100;150,150;200,200"
+- `brush_size`: Thickness (5-200px)
+
+**Outputs:**
+- `MASK`: Drawn mask
+
+### 🖌️ Manual Mask Painter
+Programmatic mask generation via coordinates.
+
+**Inputs:**
+- `reference_image`: Frame reference
+- `brush_size`: Circle radius at each point
+- `mask_data`: Semicolon-separated x,y coordinates
+
+**Outputs:**
+- `MASK`: Generated mask
+
+---
 
 ## 🎯 Basic Workflow
 

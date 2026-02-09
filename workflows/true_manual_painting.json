@@ -1,0 +1,209 @@
+{
+  "last_node_id": 11,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadGIF",
+      "pos": [50, 100],
+      "size": {"0": 315, "1": 58},
+      "outputs": [
+        {"name": "frames", "type": "IMAGE", "links": [1, 7]}
+      ],
+      "properties": {},
+      "widgets_values": ["example.gif"]
+    },
+    {
+      "id": 2,
+      "type": "GIFFrameSelector",
+      "pos": [400, 100],
+      "size": {"0": 315, "1": 130},
+      "inputs": [
+        {"name": "frames", "type": "IMAGE", "link": 1}
+      ],
+      "outputs": [
+        {"name": "frames", "type": "IMAGE", "links": [2]}
+      ],
+      "properties": {},
+      "widgets_values": [0, 1, 1]
+    },
+    {
+      "id": 3,
+      "type": "LoadPaintedMask",
+      "pos": [750, 100],
+      "size": {"0": 400, "1": 150},
+      "inputs": [
+        {"name": "reference_image", "type": "IMAGE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "MASK", "type": "MASK", "links": [3]}
+      ],
+      "properties": {},
+      "widgets_values": ["my_mask.png", "no"]
+    },
+    {
+      "id": 4,
+      "type": "BatchMaskGenerator",
+      "pos": [400, 300],
+      "size": {"0": 315, "1": 180},
+      "inputs": [
+        {"name": "frames", "type": "IMAGE", "link": 7},
+        {"name": "mask", "type": "MASK", "link": 3}
+      ],
+      "outputs": [
+        {"name": "MASK", "type": "MASK", "links": [4, 10]}
+      ],
+      "properties": {},
+      "widgets_values": ["manual", 0, 0, 100, 100, 10]
+    },
+    {
+      "id": 5,
+      "type": "BatchInpaintPreview",
+      "pos": [750, 300],
+      "size": {"0": 315, "1": 100},
+      "inputs": [
+        {"name": "frames", "type": "IMAGE", "link": 7},
+        {"name": "masks", "type": "MASK", "link": 10}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": []}
+      ],
+      "properties": {},
+      "widgets_values": [0, 0.5]
+    },
+    {
+      "id": 6,
+      "type": "CheckpointLoaderSimple",
+      "pos": [50, 550],
+      "size": {"0": 315, "1": 98},
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [8]},
+        {"name": "CLIP", "type": "CLIP", "links": [11, 12]},
+        {"name": "VAE", "type": "VAE", "links": [5, 6]}
+      ],
+      "properties": {},
+      "widgets_values": ["dreamshaper_8.safetensors"]
+    },
+    {
+      "id": 7,
+      "type": "VAEEncode",
+      "pos": [1100, 100],
+      "size": {"0": 210, "1": 46},
+      "inputs": [
+        {"name": "pixels", "type": "IMAGE", "link": 1},
+        {"name": "vae", "type": "VAE", "link": 5}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [9]}
+      ],
+      "properties": {}
+    },
+    {
+      "id": 8,
+      "type": "SetLatentNoiseMask",
+      "pos": [1350, 100],
+      "size": {"0": 210, "1": 46},
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 9},
+        {"name": "mask", "type": "MASK", "link": 4}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [13]}
+      ],
+      "properties": {}
+    },
+    {
+      "id": 9,
+      "type": "CLIPTextEncode",
+      "pos": [50, 700],
+      "size": {"0": 300, "1": 100},
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 11}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [14]}
+      ],
+      "properties": {},
+      "widgets_values": ["clean background, seamless, natural lighting"]
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [50, 850],
+      "size": {"0": 300, "1": 100},
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 12}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [15]}
+      ],
+      "properties": {},
+      "widgets_values": ["blurry, low quality, artifacts"]
+    },
+    {
+      "id": 11,
+      "type": "KSampler",
+      "pos": [1600, 100],
+      "size": {"0": 315, "1": 262},
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 8},
+        {"name": "positive", "type": "CONDITIONING", "link": 14},
+        {"name": "negative", "type": "CONDITIONING", "link": 15},
+        {"name": "latent_image", "type": "LATENT", "link": 13}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [16]}
+      ],
+      "properties": {},
+      "widgets_values": [42, "fixed", 25, 7, "dpmpp_2m", "karras", 0.85]
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [1950, 100],
+      "size": {"0": 210, "1": 46},
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 16},
+        {"name": "vae", "type": "VAE", "link": 6}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [17]}
+      ],
+      "properties": {}
+    },
+    {
+      "id": 13,
+      "type": "SaveGIF",
+      "pos": [2200, 100],
+      "size": {"0": 315, "1": 150},
+      "inputs": [
+        {"name": "frames", "type": "IMAGE", "link": 17}
+      ],
+      "properties": {},
+      "widgets_values": ["inpainted", 100, 0, true]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "IMAGE"],
+    [2, 2, 0, 3, 0, "IMAGE"],
+    [3, 3, 0, 4, 1, "MASK"],
+    [4, 4, 0, 8, 1, "MASK"],
+    [5, 6, 2, 7, 1, "VAE"],
+    [6, 6, 2, 12, 1, "VAE"],
+    [7, 1, 0, 4, 0, "IMAGE"],
+    [8, 6, 0, 11, 0, "MODEL"],
+    [9, 7, 0, 8, 0, "LATENT"],
+    [10, 4, 0, 5, 1, "MASK"],
+    [11, 6, 1, 9, 0, "CLIP"],
+    [12, 6, 1, 10, 0, "CLIP"],
+    [13, 8, 0, 11, 3, "LATENT"],
+    [14, 9, 0, 11, 1, "CONDITIONING"],
+    [15, 10, 0, 11, 2, "CONDITIONING"],
+    [16, 11, 0, 12, 0, "LATENT"],
+    [17, 12, 0, 13, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
